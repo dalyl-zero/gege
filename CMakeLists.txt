@@ -4,10 +4,8 @@ project(gege)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(SFML REQUIRED COMPONENTS network)
-include_directories(${SFML_INCLUDE_DIR})
-
 find_package(Boost REQUIRED COMPONENTS system)
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(Threads REQUIRED)
 
 add_executable(${PROJECT_NAME} src/main.cpp src/Client.cpp src/Client.hpp src/Config.cpp src/Config.hpp src/main.cpp)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} sfml-network -pthread)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} sfml-network Threads::Threads)
