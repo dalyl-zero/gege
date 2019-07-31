@@ -20,7 +20,7 @@ public:
     void user(const std::string& username, const std::string& hostname, const std::string& servername, const std::string& realname);
     void join(const std::string& channel);
     void msg(const std::string& target, const std::string& content);
-    void quit(std::optional<std::string> message);
+    void quit(std::optional<std::string> log);
     void listen();
     [[nodiscard]] bool is_connected() const;
 
