@@ -2,29 +2,42 @@
 // Created by dalyl on 7/29/19.
 //
 
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/log/utility/setup/file.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
+#include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <ctime>
 
 #include "Client.hpp"
 
 static constexpr std::size_t BUFFER_SIZE = 1024;
+static const std::string_view LOG_PATH = "./log/";
 
 Client::Client(const Config& config) : m_connected{false}, m_registered{false} {
     sf::Socket::Status status = m_socket.connect(config.addr(), config.port());
+    std::stringstream port;
+    port << config.port();
     if (status != sf::Socket::Done) {
-        std::stringstream port;
-        port << config.port();
         throw std::runtime_error("Error: Unable to connect to " + config.addr() + " at port " + port.str());
     }
     m_connected = true;
+    m_logstr += config.addr() + " " + port.str() + "\n\n";
 }
 
-void Client::nick(const std::string &name) {
+Client::~Client() {
+    log();
+}
+
+void Client::nick(const std::string& name) {
     std::string msg = "NICK " + name + "\r\n";
+    m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to change nickname to " + name);
     }
@@ -33,6 +46,7 @@ void Client::nick(const std::string &name) {
 void Client::user(const std::string& username, const std::string& hostname, const std::string& servername,
                   const std::string& realname) {
     std::string msg = "USER " + username + " " + hostname + " " + servername + " :" + realname + "\r\n";
+    m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to set USER");
     }
@@ -44,24 +58,27 @@ void Client::join(const std::string& channel) {
     }
 
     std::string msg = "JOIN #" + channel + "\r\n";
+    m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to join channel #" + channel);
     }
 }
 
 void Client::msg(const std::string& target, const std::string& content) {
-    std::string msg = "PRIVMSG " + target + " " + content + "\r\n";
+    std::string msg = "PRIVMSG " + target + " :" + content + "\r\n";
+    m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to send message to " + target);
     }
 }
 
-void Client::quit(std::optional<std::string> log) {
+void Client::quit(std::optional<std::string> last_msg) {
     std::string msg = "QUIT ";
-    if (log.has_value()) {
-        msg += log.value();
+    if (last_msg.has_value()) {
+        msg += last_msg.value();
     }
     msg += "\r\n";
+    m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to QUIT");
     }
@@ -77,6 +94,7 @@ void Client::listen() {
     }
     std::string received{buffer, data_size};
 
+    m_logstr += received;
     std::cout << received;
 
     std::vector<std::string> tokens;
@@ -84,6 +102,7 @@ void Client::listen() {
     for (std::size_t i = 0; i < tokens.size(); ++i) {
         if (tokens[i] == "PING") {
             std::string msg = "PONG " + tokens[i + 1] + "\r\n";
+            m_logstr += msg;
             if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
                 throw std::runtime_error("Error: Unable to send PONG");
             }
@@ -92,6 +111,23 @@ void Client::listen() {
             m_registered = true;
         }
     }
+}
+
+void Client::log() const {
+    namespace fs = std::filesystem;
+
+    fs::path log_dir{LOG_PATH};
+    if (!fs::exists(log_dir)) {
+        fs::create_directory(log_dir);
+    }
+
+    auto timenow = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::string filename = boost::replace_all_copy(std::string{ctime(&timenow)}, " ", "_");
+
+    boost::log::add_file_log(log_dir.string() + filename);
+    boost::log::core::get()->set_filter( boost::log::trivial::severity >= boost::log::trivial::info );
+
+    BOOST_LOG_TRIVIAL(info) << m_logstr;
 }
 
 bool Client::is_connected() const {
