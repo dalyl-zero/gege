@@ -4,13 +4,12 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/log/utility/setup/file.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/tokenizer.hpp>
 #include <filesystem>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <thread>
 #include <chrono>
 #include <ctime>
@@ -97,18 +96,22 @@ void Client::listen() {
     m_logstr += received;
     std::cout << received;
 
-    std::vector<std::string> tokens;
-    boost::split(tokens, received, boost::is_any_of(" ,\r\n"));
-    for (std::size_t i = 0; i < tokens.size(); ++i) {
-        if (tokens[i] == "PING") {
-            std::string msg = "PONG " + tokens[i + 1] + "\r\n";
-            m_logstr += msg;
-            if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
-                throw std::runtime_error("Error: Unable to send PONG");
+    using tokenizer_t = boost::tokenizer<boost::char_separator<char>>;
+    boost::char_separator<char> sep{"\r\n"};
+    tokenizer_t lines{received, sep};
+    for (auto& line : lines) {
+        boost::tokenizer<> tokens{line};
+        for (auto token_iterator = tokens.begin(); token_iterator != tokens.end(); ++token_iterator) {
+            if (*token_iterator == "PING") {
+                std::string msg = "PONG :" + *++token_iterator + "\r\n";
+                m_logstr += msg;
+                if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+                    throw std::runtime_error("Error: Unable to send PONG");
+                }
             }
-        }
-        if (tokens[i] == "MODE") {
-            m_registered = true;
+            else if (*token_iterator == "MODE") {
+                m_registered = true;
+            }
         }
     }
 }
