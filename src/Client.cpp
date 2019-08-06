@@ -7,7 +7,6 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/tokenizer.hpp>
-#include <filesystem>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -117,17 +116,10 @@ void Client::listen() {
 }
 
 void Client::log() const {
-    namespace fs = std::filesystem;
-
-    fs::path log_dir{LOG_PATH};
-    if (!fs::exists(log_dir)) {
-        fs::create_directory(log_dir);
-    }
-
     auto timenow = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::string filename = boost::replace_all_copy(std::string{ctime(&timenow)}, " ", "_");
 
-    boost::log::add_file_log(log_dir.string() + filename);
+    boost::log::add_file_log(std::string{LOG_PATH} + filename);
     boost::log::core::get()->set_filter( boost::log::trivial::severity >= boost::log::trivial::info );
 
     BOOST_LOG_TRIVIAL(info) << m_logstr;
