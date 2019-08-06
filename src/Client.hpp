@@ -17,11 +17,11 @@ class Client {
 public:
     explicit Client(const Config& config);
     ~Client();
-    void nick(const std::string& name);
-    void user(const std::string& username, const std::string& hostname, const std::string& servername, const std::string& realname);
-    void join(const std::string& channel);
-    void msg(const std::string& target, const std::string& content);
-    void quit(std::optional<std::string> last_msg);
+    void nick(std::string_view name);
+    void user(std::string_view username, std::string_view hostname, std::string_view servername, std::string_view realname);
+    void join(std::string_view channel);
+    void msg(std::string_view target, std::string_view content);
+    void quit(std::optional<std::string_view> last_msg);
     void listen();
     [[nodiscard]] bool is_connected() const;
 

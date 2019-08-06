@@ -33,44 +33,44 @@ Client::~Client() {
     log();
 }
 
-void Client::nick(const std::string& name) {
-    std::string msg = "NICK " + name + "\r\n";
+void Client::nick(std::string_view name) {
+    std::string msg = "NICK " + std::string{name} + "\r\n";
     m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
-        throw std::runtime_error("Error: Unable to change nickname to " + name);
+        throw std::runtime_error("Error: Unable to change nickname to " + std::string{name});
     }
 }
 
-void Client::user(const std::string& username, const std::string& hostname, const std::string& servername,
-                  const std::string& realname) {
-    std::string msg = "USER " + username + " " + hostname + " " + servername + " :" + realname + "\r\n";
+void Client::user(std::string_view username, std::string_view hostname, std::string_view servername,
+                  std::string_view realname) {
+    std::string msg = "USER " + std::string{username} + " " + std::string{hostname} + " " + std::string{servername} + " :" + std::string{realname} + "\r\n";
     m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to set USER");
     }
 }
 
-void Client::join(const std::string& channel) {
+void Client::join(std::string_view channel) {
     if (!m_registered) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    std::string msg = "JOIN #" + channel + "\r\n";
+    std::string msg = "JOIN #" + std::string{channel} + "\r\n";
     m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
-        throw std::runtime_error("Error: Unable to join channel #" + channel);
+        throw std::runtime_error("Error: Unable to join channel #" + std::string{channel});
     }
 }
 
-void Client::msg(const std::string& target, const std::string& content) {
-    std::string msg = "PRIVMSG " + target + " :" + content + "\r\n";
+void Client::msg(std::string_view target, std::string_view content) {
+    std::string msg = "PRIVMSG " + std::string{target} + " :" + std::string{content} + "\r\n";
     m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
-        throw std::runtime_error("Error: Unable to send message to " + target);
+        throw std::runtime_error("Error: Unable to send message to " + std::string{target});
     }
 }
 
-void Client::quit(std::optional<std::string> last_msg) {
+void Client::quit(std::optional<std::string_view> last_msg) {
     std::string msg = "QUIT ";
     if (last_msg.has_value()) {
         msg += last_msg.value();
