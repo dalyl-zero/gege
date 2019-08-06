@@ -70,18 +70,18 @@ void Client::msg(std::string_view target, std::string_view content) {
     }
 }
 
-void Client::quit(std::optional<std::string_view> last_msg) {
-    std::string msg = "QUIT ";
-    if (last_msg.has_value()) {
-        msg += last_msg.value();
-    }
-    msg += "\r\n";
+void Client::quit(std::string_view quit_msg) {
+    std::string msg = "QUIT " + std::string{quit_msg} + "\r\n";
     m_logstr += msg;
     if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
         throw std::runtime_error("Error: Unable to QUIT");
     }
     m_connected = false;
     m_registered = false;
+}
+
+void Client::quit() {
+    quit("");
 }
 
 void Client::listen() {

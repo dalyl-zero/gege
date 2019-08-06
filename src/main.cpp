@@ -21,7 +21,7 @@ int main() {
         gege.user("gege", "0", "*", "gege");
         gege.join("general");
         gege.msg("#general", "Hello, world!");
-        gege.quit(std::nullopt);
+        gege.quit();
 
         listener.join();
     }
