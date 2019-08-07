@@ -84,6 +84,14 @@ void Client::quit() {
     quit("");
 }
 
+void Client::pong(std::string_view code) {
+    std::string msg = "PONG " + std::string{code};
+    m_logstr += msg;
+    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+        throw std::runtime_error("Error: Unable to send PONG");
+    }
+}
+
 void Client::listen() {
     char buffer[BUFFER_SIZE];
     std::size_t data_size;
@@ -102,11 +110,8 @@ void Client::listen() {
         boost::tokenizer<> tokens{line};
         for (auto token_iterator = tokens.begin(); token_iterator != tokens.end(); ++token_iterator) {
             if (*token_iterator == "PING") {
-                std::string msg = "PONG :" + *++token_iterator + "\r\n";
-                m_logstr += msg;
-                if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
-                    throw std::runtime_error("Error: Unable to send PONG");
-                }
+                auto code = ":" + *token_iterator++;
+                pong(code);
             }
             else if (*token_iterator == "MODE") {
                 m_registered = true;

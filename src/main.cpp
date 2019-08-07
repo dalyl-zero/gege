@@ -6,21 +6,20 @@
 int main() {
     try {
         // Example
-        Client gege{{"irc.sfml-dev.org", 6667}};
+        Client gege{{"irc.freenode.net", 6667}};
 
         std::mutex mutex;
         std::thread listener{[&]() {
             while (gege.is_connected()) {
-                mutex.lock();
+                std::lock_guard<std::mutex> lock{mutex};
                 gege.listen();
-                mutex.unlock();
             }
         }};
 
-        gege.nick("gege");
-        gege.user("gege", "0", "*", "gege");
-        gege.join("general");
-        gege.msg("#general", "Hello, world!");
+        gege.nick("dalyl");
+        gege.user("dalyl", "0", "*", "dalyl");
+        gege.join("blender");
+        gege.msg("#blender", "Hello, world!");
         gege.quit();
 
         listener.join();
