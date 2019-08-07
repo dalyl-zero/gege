@@ -16,10 +16,10 @@ int main() {
             }
         }};
 
-        gege.nick("dalyl");
-        gege.user("dalyl", "0", "*", "dalyl");
-        gege.join("blender");
-        gege.msg("#blender", "Hello, world!");
+        gege.nick("gege");
+        gege.user("gege", "0", "*", ":gege");
+        gege.join("#bot-test");
+        gege.msg("#bot-test", ":Hello, world!");
         gege.quit();
 
         listener.join();

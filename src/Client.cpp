@@ -34,18 +34,14 @@ Client::~Client() {
 }
 
 void Client::nick(std::string_view name) {
-    std::string msg = "NICK " + std::string{name} + "\r\n";
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("NICK", name)) {
         throw std::runtime_error("Error: Unable to change nickname to " + std::string{name});
     }
 }
 
 void Client::user(std::string_view username, std::string_view hostname, std::string_view servername,
                   std::string_view realname) {
-    std::string msg = "USER " + std::string{username} + " " + std::string{hostname} + " " + std::string{servername} + " :" + std::string{realname} + "\r\n";
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("USER", username, hostname, servername, realname)) {
         throw std::runtime_error("Error: Unable to set USER");
     }
 }
@@ -55,25 +51,19 @@ void Client::join(std::string_view channel) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    std::string msg = "JOIN #" + std::string{channel} + "\r\n";
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("JOIN", channel)) {
         throw std::runtime_error("Error: Unable to join channel #" + std::string{channel});
     }
 }
 
 void Client::msg(std::string_view target, std::string_view content) {
-    std::string msg = "PRIVMSG " + std::string{target} + " :" + std::string{content} + "\r\n";
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("PRIVMSG", target, content)) {
         throw std::runtime_error("Error: Unable to send message to " + std::string{target});
     }
 }
 
 void Client::quit(std::string_view quit_msg) {
-    std::string msg = "QUIT " + std::string{quit_msg} + "\r\n";
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("QUIT", quit_msg)) {
         throw std::runtime_error("Error: Unable to QUIT");
     }
     m_connected = false;
@@ -85,9 +75,7 @@ void Client::quit() {
 }
 
 void Client::pong(std::string_view code) {
-    std::string msg = "PONG " + std::string{code};
-    m_logstr += msg;
-    if (m_socket.send(msg.c_str(), msg.size()) != sf::Socket::Done) {
+    if (!send("PONG", code)) {
         throw std::runtime_error("Error: Unable to send PONG");
     }
 }

@@ -5,6 +5,7 @@
 #ifndef GEGE_CLIENT_HPP
 #define GEGE_CLIENT_HPP
 
+#include <boost/algorithm/string/trim.hpp>
 #include <SFML/Network.hpp>
 #include <exception>
 #include <iostream>
@@ -29,6 +30,16 @@ public:
 
 private:
     void log() const;
+
+private:
+    template <typename... Ts>
+    bool send(Ts ...args) {
+        auto msg = (std::string{args} + " " + ...);
+        boost::trim(msg);
+        msg += "\r\n";
+        m_logstr += msg;
+        return m_socket.send(msg.c_str(), msg.size()) == sf::Socket::Done;
+    }
 
 private:
     sf::TcpSocket m_socket;
