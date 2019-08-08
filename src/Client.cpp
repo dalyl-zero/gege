@@ -70,10 +70,6 @@ void Client::quit(std::string_view quit_msg) {
     m_registered = false;
 }
 
-void Client::quit() {
-    quit("");
-}
-
 void Client::pong(std::string_view code) {
     if (!send("PONG", code)) {
         throw std::runtime_error("Error: Unable to send PONG");

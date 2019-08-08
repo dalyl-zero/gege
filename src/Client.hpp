@@ -22,8 +22,7 @@ public:
     void user(std::string_view username, std::string_view hostname, std::string_view servername, std::string_view realname);
     void join(std::string_view channel);
     void msg(std::string_view target, std::string_view content);
-    void quit(std::string_view quit_msg);
-    void quit();
+    void quit(std::string_view quit_msg = "");
     void pong(std::string_view code);
     void listen();
     [[nodiscard]] bool is_connected() const;
