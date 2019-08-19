@@ -38,12 +38,14 @@ void Bot::exec() {
     m_client.connect(m_addr, m_port);
     m_client.nick(m_nick);
     m_client.user(m_nick, "0", "*", m_nick);
+    bool joined{false};
 
     while (m_client.is_connected()) {
         std::string_view m_received = m_client.listen();
         parse(m_received);
-        if (m_client.is_registered()) {
+        if (m_client.is_registered() && !joined) {
             m_client.join(m_channel);
+            joined = true;
         }
     }
 }
