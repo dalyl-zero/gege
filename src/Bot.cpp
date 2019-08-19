@@ -4,7 +4,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <iostream>
-#include <mutex>
 
 #include "Bot.hpp"
 
@@ -40,8 +39,6 @@ void Bot::stop() {
 }
 
 void Bot::exec() {
-    std::mutex mutex;
-    std::lock_guard<std::mutex> lock{mutex};
     while (m_client.is_connected()) {
         std::string_view m_received = m_client.listen();
         parse(m_received);
