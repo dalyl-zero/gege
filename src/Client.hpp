@@ -7,6 +7,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <SFML/Network.hpp>
+#include <iostream>
 
 class Client {
 public:
@@ -34,6 +35,7 @@ private:
         boost::trim(msg);
         msg += "\r\n";
         m_logstr += msg;
+        std::cout << msg;
         return m_socket.send(msg.c_str(), msg.size()) == sf::Socket::Done;
     }
 

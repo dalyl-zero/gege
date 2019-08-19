@@ -54,7 +54,8 @@ void Bot::parse(std::string_view received) {
         boost::tokenizer<> tokens{line};
         for (auto token = tokens.begin(); token != tokens.end(); ++token) {
             if (*token == "PING") {
-                auto code = ":" + *token++;
+                token++;
+                auto code = ":" + *token;
                 m_client.pong(code);
             }
             else if (*token == "MODE") {
