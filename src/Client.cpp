@@ -55,10 +55,6 @@ void Client::user(std::string_view username, std::string_view hostname, std::str
 }
 
 void Client::join(std::string_view channel) {
-    if (!m_registered) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
     if (!send("JOIN", channel)) {
         std::cerr << "Error: Unable to join channel #" + std::string{channel} << std::endl;
     }
@@ -110,4 +106,8 @@ void Client::log() const {
 
 bool Client::is_connected() const {
     return m_connected;
+}
+
+bool Client::is_registered() const {
+    return m_registered;
 }

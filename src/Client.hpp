@@ -24,6 +24,7 @@ public:
     void pong(std::string_view code);
     std::string_view listen();
     [[nodiscard]] bool is_connected() const;
+    [[nodiscard]] bool is_registered() const;
 
 private:
     void log() const;
