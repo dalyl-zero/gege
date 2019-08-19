@@ -27,7 +27,9 @@ public:
     [[nodiscard]] bool is_registered() const;
 
 private:
+    void disconnect();
     void log() const;
+    void log(std::string_view error);
 
 private:
     template <typename... Ts>

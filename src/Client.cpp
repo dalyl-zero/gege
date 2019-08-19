@@ -7,7 +7,6 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
 #include <iostream>
-#include <thread>
 #include <chrono>
 #include <ctime>
 
@@ -30,7 +29,7 @@ void Client::connect(std::string_view addr, unsigned short port) {
         std::stringstream ss;
         ss << port;
         if (status != sf::Socket::Done) {
-            std::cerr << "Error: Unable to connect to " + std::string{addr} + " at port " + ss.str() << std::endl;
+            log("connect to " + std::string{addr} + " at port " + ss.str());
         }
         m_connected = true;
         m_logstr += std::string{addr} + " " + ss.str() + "\n\n";
@@ -43,40 +42,41 @@ void Client::registration() {
 
 void Client::nick(std::string_view name) {
     if (!send("NICK", name)) {
-        std::cerr << "Error: Unable to change nickname to " + std::string{name} << std::endl;
+        log("change nickname to " + std::string{name});
     }
 }
 
 void Client::user(std::string_view username, std::string_view hostname, std::string_view servername,
                   std::string_view realname) {
     if (!send("USER", username, hostname, servername, realname)) {
-        std::cerr << "Error: Unable to set USER" << std::endl;
+        log("set USER");
     }
 }
 
 void Client::join(std::string_view channel) {
     if (!send("JOIN", channel)) {
-        std::cerr << "Error: Unable to join channel #" + std::string{channel} << std::endl;
+        log("JOIN " + std::string{channel});
     }
 }
 
 void Client::msg(std::string_view target, std::string_view content) {
     if (!send("PRIVMSG", target, content)) {
-        std::cerr << "Error: Unable to send message to " + std::string{target} << std::endl;
+        log("send message to " + std::string{target});
     }
 }
 
 void Client::quit(std::string_view quit_msg) {
     if (!send("QUIT", quit_msg)) {
-        std::cerr << "Error: Unable to QUIT" << std::endl;
+        log("QUIT");
     }
-    m_connected = false;
-    m_registered = false;
+    else {
+        disconnect();
+    }
 }
 
 void Client::pong(std::string_view code) {
     if (!send("PONG", code)) {
-        std::cerr << "Error: Unable to send PONG" << std::endl;
+        log("send PONG");
     }
 }
 
@@ -84,7 +84,7 @@ std::string_view Client::listen() {
     char buffer[BUFFER_SIZE];
     std::size_t data_size;
     if (m_socket.receive(buffer, BUFFER_SIZE, data_size) != sf::Socket::Done) {
-        std::cerr << "Error: Unable to receive data" << std::endl;
+        log("receive data");
     }
     std::string received{buffer, data_size};
 
@@ -92,6 +92,11 @@ std::string_view Client::listen() {
     std::cout << received;
 
     return received;
+}
+
+void Client::disconnect() {
+    m_registered = false;
+    m_connected = false;
 }
 
 void Client::log() const {
@@ -102,6 +107,12 @@ void Client::log() const {
     boost::log::core::get()->set_filter( boost::log::trivial::severity >= boost::log::trivial::info );
 
     BOOST_LOG_TRIVIAL(info) << m_logstr;
+}
+
+void Client::log(std::string_view error) {
+    std::string msg = "[ABORTED] Unexpected error when trying to " + std::string{error} + "\r\n";
+    m_logstr += msg;
+    disconnect();
 }
 
 bool Client::is_connected() const {
