@@ -35,6 +35,10 @@ std::thread Bot::run() {
     return std::thread{&Bot::exec, this};
 }
 
+void Bot::stop() {
+    m_client.quit();
+}
+
 void Bot::exec() {
     std::mutex mutex;
     std::lock_guard<std::mutex> lock{mutex};

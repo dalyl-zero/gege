@@ -17,6 +17,7 @@ class Bot {
 public:
     explicit Bot(std::string_view filename);
     std::thread run();
+    void stop();
 
 private:
     void exec();
