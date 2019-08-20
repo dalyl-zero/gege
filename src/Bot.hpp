@@ -14,11 +14,10 @@
 class Bot {
 public:
     explicit Bot(std::string_view filename);
-    std::thread run();
+    void run();
     void stop();
 
 private:
-    void exec();
     void parse(std::string_view received);
 
 private:

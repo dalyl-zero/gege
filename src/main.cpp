@@ -1,13 +1,16 @@
 #include <SFML/Window.hpp>
+#include <thread>
 
 #include "Bot.hpp"
 
 int main() {
     Bot gege("bot.json");
 
-    auto network_listener = gege.run();
+    auto network = std::thread([&](){
+        gege.run();
+    });
 
-    auto input_listener = std::thread([&](){
+    auto input = std::thread([&](){
         while (true) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
                 gege.stop();
@@ -16,8 +19,8 @@ int main() {
         }
     });
 
-    network_listener.join();
-    input_listener.join();
+    network.join();
+    input.join();
 
     return 0;
 }

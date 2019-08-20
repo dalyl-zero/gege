@@ -4,7 +4,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <iostream>
-#include <future>
 
 #include "Bot.hpp"
 
@@ -26,15 +25,7 @@ Bot::Bot(std::string_view filename) {
     m_channel = m_config["channel"];
 }
 
-std::thread Bot::run() {
-    return std::thread{&Bot::exec, this};
-}
-
-void Bot::stop() {
-    m_client.quit();
-}
-
-void Bot::exec() {
+void Bot::run() {
     m_client.connect(m_addr, m_port);
     m_client.nick(m_nick);
     m_client.user(m_nick, "0", "*", m_nick);
@@ -48,6 +39,10 @@ void Bot::exec() {
             joined = true;
         }
     }
+}
+
+void Bot::stop() {
+    m_client.quit();
 }
 
 void Bot::parse(std::string_view received) {
