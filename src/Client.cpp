@@ -15,7 +15,7 @@
 static constexpr std::size_t BUFFER_SIZE = 1024;
 static const std::string_view LOG_DIR = "./log/";
 
-Client::Client(std::string_view addr, unsigned short port) : m_connected{false}, m_registered{false} {
+Client::Client(std::string_view addr, std::uint16_t port) : m_connected{false}, m_registered{false} {
     connect(addr, port);
 }
 
@@ -23,7 +23,7 @@ Client::~Client() {
     log();
 }
 
-void Client::connect(std::string_view addr, unsigned short port) {
+void Client::connect(std::string_view addr, std::uint16_t port) {
     if (!m_connected) {
         sf::Socket::Status status = m_socket.connect(std::string{addr}, port);
         std::stringstream ss;

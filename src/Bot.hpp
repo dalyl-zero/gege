@@ -22,7 +22,7 @@ private:
 
 private:
     std::string m_addr;
-    unsigned short m_port;
+    std::uint16_t m_port;
     std::string m_nick;
     std::string m_channel;
     nlohmann::json m_config;

@@ -12,9 +12,9 @@
 class Client {
 public:
     Client() = default;
-    Client(std::string_view addr, unsigned short port);
+    Client(std::string_view addr, std::uint16_t port);
     ~Client();
-    void connect(std::string_view addr, unsigned short port);
+    void connect(std::string_view addr, std::uint16_t port);
     void registration();
     void nick(std::string_view name);
     void user(std::string_view username, std::string_view hostname, std::string_view realname, std::string_view servername);
