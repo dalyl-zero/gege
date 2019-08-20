@@ -11,8 +11,6 @@
 
 #include "Client.hpp"
 
-using nlohmann::json;
-
 class Bot {
 public:
     explicit Bot(std::string_view filename);
@@ -28,7 +26,7 @@ private:
     unsigned short m_port;
     std::string m_nick;
     std::string m_channel;
-    json m_config;
+    nlohmann::json m_config;
     Client m_client;
 };
 
