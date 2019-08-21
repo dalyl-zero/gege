@@ -80,7 +80,7 @@ void Client::pong(std::string_view code) {
     }
 }
 
-std::string_view Client::listen() {
+std::string Client::listen() {
     char buffer[BUFFER_SIZE];
     std::size_t data_size;
     if (m_socket.receive(buffer, BUFFER_SIZE, data_size) != sf::Socket::Done) {

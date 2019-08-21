@@ -2,7 +2,7 @@
 // Created by dalyl on 7/29/19.
 //
 
-#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <iostream>
 
 #include "Bot.hpp"
@@ -32,8 +32,8 @@ void Bot::run() {
     bool joined{false};
 
     while (m_client.is_connected()) {
-        std::string_view m_received = m_client.listen();
-        parse(m_received);
+        parse(m_client.listen());
+
         if (m_client.is_registered() && !joined) {
             m_client.join(m_channel);
             joined = true;
@@ -45,22 +45,17 @@ void Bot::stop() {
     m_client.quit();
 }
 
-void Bot::parse(std::string_view received) {
-    using tokenizer_t = boost::tokenizer<boost::char_separator<char>>;
+void Bot::parse(const std::string& received) {
+    std::vector<std::string> tokens;
+    boost::split(tokens, received, boost::is_space());
 
-    boost::char_separator<char> sep{"\r\n"};
-    tokenizer_t lines{received, sep};
-    for (auto& line : lines) {
-        boost::tokenizer<> tokens{line};
-        for (auto token = tokens.begin(); token != tokens.end(); ++token) {
-            if (*token == "PING") {
-                token++;
-                auto code = ":" + *token;
-                m_client.pong(code);
-            }
-            else if (*token == "MODE") {
-                m_client.registration();
-            }
+    for (std::size_t i = 0; i < tokens.size(); ++i) {
+        if (tokens[i] == "PING") {
+            m_client.pong(tokens[i + 1]);
+            ++i;
+        }
+        else if (tokens[i] == "MODE") {
+            m_client.registration();
         }
     }
 }

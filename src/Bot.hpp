@@ -18,7 +18,7 @@ public:
     void stop();
 
 private:
-    void parse(std::string_view received);
+    void parse(const std::string& received);
 
 private:
     std::string m_addr;

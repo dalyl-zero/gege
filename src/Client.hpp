@@ -22,7 +22,7 @@ public:
     void msg(std::string_view target, std::string_view content);
     void quit(std::string_view quit_msg = "");
     void pong(std::string_view code);
-    std::string_view listen();
+    std::string listen();
     [[nodiscard]] bool is_connected() const;
     [[nodiscard]] bool is_registered() const;
 
